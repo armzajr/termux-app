@@ -23,12 +23,13 @@ import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.PopupWindow;
 
 import com.termux.R;
+import com.termux.app.terminal.TermuxTerminalSessionClient;
+import com.termux.app.terminal.TermuxTerminalViewClient;
 import com.termux.view.TerminalView;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -43,6 +44,9 @@ public final class ExtraKeysView extends GridLayout {
     private static final int BUTTON_COLOR = 0x00000000;
     private static final int INTERESTING_COLOR = 0xFF80DEEA;
     private static final int BUTTON_PRESSED_COLOR = 0xFF7F7F7F;
+
+    TermuxTerminalViewClient mTermuxTerminalViewClient;
+    TermuxTerminalSessionClient mTermuxTerminalSessionClient;
 
     public ExtraKeysView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -82,11 +86,14 @@ public final class ExtraKeysView extends GridLayout {
     private void sendKey(View view, String keyName, boolean forceCtrlDown, boolean forceLeftAltDown) {
         TerminalView terminalView = view.findViewById(R.id.terminal_view);
         if ("KEYBOARD".equals(keyName)) {
-            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(0, 0);
+            if(mTermuxTerminalViewClient != null)
+                mTermuxTerminalViewClient.onToggleSoftKeyboardRequest();
         } else if ("DRAWER".equals(keyName)) {
             DrawerLayout drawer = view.findViewById(R.id.drawer_layout);
             drawer.openDrawer(Gravity.LEFT);
+        } else if ("PASTE".equals(keyName)) {
+            if(mTermuxTerminalSessionClient != null)
+                mTermuxTerminalSessionClient.onPasteTextFromClipboard(null);
         } else if (keyCodesForString.containsKey(keyName)) {
             Integer keyCode = keyCodesForString.get(keyName);
             if (keyCode == null) return;
@@ -300,6 +307,10 @@ public final class ExtraKeysView extends GridLayout {
                         case MotionEvent.ACTION_DOWN:
                             longPressCount = 0;
                             v.setBackgroundColor(BUTTON_PRESSED_COLOR);
+                            if (scheduledExecutor != null) {
+                                scheduledExecutor.shutdownNow();
+                                scheduledExecutor = null;
+                            }
                             if (Arrays.asList("UP", "DOWN", "LEFT", "RIGHT", "BKSP", "DEL").contains(buttonInfo.getKey())) {
                                 // autorepeat
                                 scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -377,6 +388,14 @@ public final class ExtraKeysView extends GridLayout {
                 addView(button);
             }
         }
+    }
+
+    public void setTermuxTerminalViewClient(TermuxTerminalViewClient termuxTerminalViewClient) {
+        this.mTermuxTerminalViewClient = termuxTerminalViewClient;
+    }
+
+    public void setTermuxTerminalSessionClient(TermuxTerminalSessionClient termuxTerminalSessionClient) {
+        this.mTermuxTerminalSessionClient = termuxTerminalSessionClient;
     }
 
 }

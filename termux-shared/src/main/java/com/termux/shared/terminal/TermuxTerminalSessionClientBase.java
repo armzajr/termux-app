@@ -22,7 +22,11 @@ public class TermuxTerminalSessionClientBase implements TerminalSessionClient {
     }
 
     @Override
-    public void onClipboardText(TerminalSession session, String text) {
+    public void onCopyTextToClipboard(TerminalSession session, String text) {
+    }
+
+    @Override
+    public void onPasteTextFromClipboard(TerminalSession session) {
     }
 
     @Override
@@ -32,6 +36,19 @@ public class TermuxTerminalSessionClientBase implements TerminalSessionClient {
     @Override
     public void onColorsChanged(TerminalSession changedSession) {
     }
+
+    @Override
+    public void onTerminalCursorStateChange(boolean state) {
+    }
+
+
+
+    @Override
+    public Integer getTerminalCursorStyle() {
+        return null;
+    }
+
+
 
     @Override
     public void logError(String tag, String message) {

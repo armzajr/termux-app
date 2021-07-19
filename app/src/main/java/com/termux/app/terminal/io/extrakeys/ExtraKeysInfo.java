@@ -1,5 +1,9 @@
 package com.termux.app.terminal.io.extrakeys;
 
+import com.termux.shared.logger.Logger;
+import com.termux.shared.settings.properties.TermuxPropertyConstants;
+import com.termux.shared.settings.properties.TermuxSharedProperties;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -112,6 +116,7 @@ public class ExtraKeysInfo {
         put("DEL", "⌦"); // U+2326 ⌦ ERASE TO THE RIGHT not well known but easy to understand
         put("DRAWER", "☰"); // U+2630 ☰ TRIGRAM FOR HEAVEN not well known but easy to understand
         put("KEYBOARD", "⌨"); // U+2328 ⌨ KEYBOARD not well known but easy to understand
+        put("PASTE", "⎘"); // U+2398
     }};
 
     static final CharDisplayMap lessKnownCharactersDisplay = new CharDisplayMap() {{
@@ -238,6 +243,8 @@ public class ExtraKeysInfo {
             case "none":
                 return new CharDisplayMap();
             default:
+                if (!TermuxPropertyConstants.DEFAULT_IVALUE_EXTRA_KEYS_STYLE.equals(style))
+                    Logger.logError(TermuxSharedProperties.LOG_TAG, "The style \"" + style + "\" for the key \"" + TermuxPropertyConstants.KEY_EXTRA_KEYS_STYLE + "\" is invalid. Using default style instead.");
                 return defaultCharDisplay;
         }
     }
